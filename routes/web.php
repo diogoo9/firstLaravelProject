@@ -14,3 +14,8 @@
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('teste', 'SkillsController@index');
+//Route::post('teste', 'SkillsController@create');
+
+//Route::post('user','UsersController@store');
