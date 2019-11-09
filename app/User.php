@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     use Notifiable;
-    public $timestamps = false; // não reconhece as created e updated
+    //public $timestamps = false; // não reconhece as created e updated
 
     /**
      * The attributes that are mass assignable.
@@ -17,7 +17,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'id','name','email','cpf','phone','status',
+        'id','name','email','cpf','phone','status'
     ];
 
     /**
