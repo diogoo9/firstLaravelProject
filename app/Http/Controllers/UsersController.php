@@ -16,7 +16,13 @@ class UsersController extends Controller
      */
     public function index()
     {
-        return User::all();
+        $users =  User::orderBy('name')->get();
+        foreach($users as $user){
+            $user->skills = UsersSkill::select('skill_id','description')
+            ->where('user_id',$user->id)->join('skills','users_skills.skill_id','skills.id')            
+            ->get();
+        }
+        return $users;
     }
 
     /**
@@ -26,26 +32,7 @@ class UsersController extends Controller
      */
     public function create()
     {
-        /*
-             $messages = [
-            'name.required'=>'nome obrigatório'
-        ];
-
-        $rules = [
-            'name'=>'required',
-            'email'=>'required',
-            'cpf'=>'required',
-            'phone'=>'required',
-        ];
-
-        $validatedData = Validator::make($request->all(),$rules)->validate();
-
-        if($validatedData->fails()){
-            return redirect('users/create')
-            ->withErrors($validatedData)
-            ->withInput();
-        }
-        */
+     
     }
 
     /**
@@ -55,30 +42,44 @@ class UsersController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {           
-        $validateData = $request->validate([
-            'name'=>'required'
-        ],['name.required'=>'campo nome obrigatório']);
-        dd($validateData->errors());
-        if($validateData->errors()){
+    {              
+             
+        $validateData =   
+        $request->validate(          
+        [
+            'name'=>'required',
+            'email'=>'required|unique:users',
+            'cpf'=>'required|unique:users',
+        ],
+        [
+            'name.required'=>'campo nome obrigatório',
+            'email.required'=>'emails é obrigatório',
+            'email.unique'=>'o e-mail ja cadaastrado',
+            'cpf.unique'=>'CPF ja cadastrado',
+            'cpf.required'=>'CPF não informado',
+        ]
+        
+            );
+ 
+        $userClass = new User();
+        $userClass->name = $request->input('name');
+        $userClass->email = $request->input('email');
+        $userClass->cpf = $request->input('cpf');
+        $userClass->phone = $request->input('phone');
+        $userClass->status = false;
+        $userClass->save();
 
-            return response()->json($validateData->errors());
-        }
-        //$userClass = new User();
-        //$userClass->name = $request->input('name');
-        //$userClass->email = $request->input('email');
-        //$userClass->cpf = $request->input('cpf');
-        ///$userClass->phone = $request->input('phone');
-        //$userClass->status = $request->input('status');
-        $userClass->save($request->all());
-        //return response()->json($errors->all());
         $skills = $request->input('skills');
-        foreach($skills as $skill){
-            $usersSkillClass = new UsersSkill();
-            $usersSkillClass->user_id = $userClass->id;  
-            $usersSkillClass->skill_id = $skill; 
-            $usersSkillClass->save();
-        }            
+        if($skills){
+            foreach($skills as $skill){
+                $usersSkillClass = new UsersSkill();
+                $usersSkillClass->user_id = $userClass->id;  
+                $usersSkillClass->skill_id = $skill["id"]; 
+                $usersSkillClass->save();
+            }
+        }
+            
+                 
         return response()->json($userClass);
         
     }    
@@ -118,9 +119,6 @@ class UsersController extends Controller
     public function update(Request $request, $id)
     {
         $userClass = User::find($id);
-        //$userClass->email = $request->input('email');
-        //$userClass->phone = $request->input('phone');
-        //$userClass->status = $request->input('status');
         $userClass->update($request->all());
         return response()->json($userClass);
 

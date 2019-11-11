@@ -95,12 +95,14 @@ class AdminsController extends Controller
         
         $email = $request->input('email');
         $password = $request->input('password');
-        $adminClass = Admin::where('email',$email)->where('password',$password);
+        //return response()->json($email);
+        $adminClass = Admin::where('email',$email)->where('password',$password)->get();
         
-        if(!$adminClass){
-            return response()->json("usuario não localizado");
+        if($adminClass){
+            return response()->json($adminClass);
+        }else{
+            return reponse()->json(false);
         }
-        return response()->json($adminClass);
     }
   
 }
